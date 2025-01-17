@@ -1,13 +1,22 @@
+import time
 import feedparser
+import schedule
 
-rss_url = "https://techcrunch.com/category/artificial-intelligence/feed/"
+def fetch_news():
+    rss_url = "https://techcrunch.com/category/artificial-intelligence/feed/"
+    feed = feedparser.parse(rss_url)
+    for entry in feed.entries[:5]:
+        print(f"Title: {entry.title}")
+        print(f"Published: {entry.published}")
+        print(f'Summary: {entry.summary}')
+        print(f"Link: {entry.link}")
+        print("-" * 50)
 
-feed = feedparser.parse(rss_url)
+schedule.every(10).minutes.do(fetch_news)
 
-for entry in feed.entries:
-    print(f"Title: {entry.title}")
-    print(f"Published: {entry.published}")
-    print(f'Summary: {entry.summary}')
-    print(f"Link: {entry.link}")
-    print("-" * 50)
-
+i = 0
+while True:
+    print(f"Time: {i + 1}")
+    schedule.run_pending()
+    time.sleep(1)
+    i += 1
