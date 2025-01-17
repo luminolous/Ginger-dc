@@ -1,22 +1,31 @@
-import time
-import feedparser
-import schedule
+from typing import Final
+import os
+from dotenv import load_dotenv
+from discord import Intents, Client, Message
+from news import *
+from add_articles import *
 
-def fetch_news():
-    rss_url = "https://techcrunch.com/category/artificial-intelligence/feed/"
-    feed = feedparser.parse(rss_url)
-    for entry in feed.entries[:5]:
-        print(f"Title: {entry.title}")
-        print(f"Published: {entry.published}")
-        print(f'Summary: {entry.summary}')
-        print(f"Link: {entry.link}")
-        print("-" * 50)
+load_dotenv()
+TOKEN: Final[str] = os.getenv('DISCORD_TOKEN')
+CHANNEL: Final[str] = os.getenv('DISCORD_CHANNEL')
+print(TOKEN)
 
-schedule.every(10).minutes.do(fetch_news)
+intents: Intents = Intents.default()
+client: Client = Client(intents=intents)
 
-i = 0
-while True:
-    print(f"Time: {i + 1}")
-    schedule.run_pending()
-    time.sleep(1)
-    i += 1
+async def post_article():
+    channel = client.get_channel(CHANNEL)
+    if channel:
+        response = news_post()
+        await channel.send(response)
+
+@client.event
+async def on_ready() -> None:
+    print(f'{client.user} is now running!')
+
+def main() -> None:
+    client.run(token=TOKEN)
+
+
+if __name__ == '__main__':
+    main()
